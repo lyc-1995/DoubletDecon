@@ -45,12 +45,8 @@ Pseudo_Marker_Finder<-function(groups, redu_data2, full_data2, min_uniq=4, log_f
   nLines = countLines(rawFilePath)[1]
   
   #Run in parallel the code for each chunk of data read from the file
-  if(nCores==-1){
-    registerDoParallel(makeCluster(detectCores()))
-  }else{
-    registerDoParallel(makeCluster(nCores))
-  }
-  
+  cl <- makeCluster(detectCores())
+  registerDoParallel(cl = cl)
   
   anovaResult = foreach(linePos = 0:floor(nLines / genesPerTime), .packages = c("dplyr"),
                         .combine = "rbind")  %dopar%  {
@@ -134,6 +130,7 @@ Pseudo_Marker_Finder<-function(groups, redu_data2, full_data2, min_uniq=4, log_f
                           
                         }
   stopImplicitCluster()
+  stopCluster(cl = cl)
   
   #Table the anova results
   anovaResultRedu=anovaResult[anovaResult[,2] %in% doublet,]
